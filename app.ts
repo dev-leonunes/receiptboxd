@@ -6,6 +6,7 @@ interface FilmData {
     memberRating: string;
     filmYear: string;
     watchedDate: string;
+    tmdbMovieId: string;
 }
 
 class LetterboxdAPI {
@@ -31,28 +32,63 @@ class LetterboxdAPI {
                 filmTitle: item['letterboxd:filmTitle'],
                 memberRating: item['letterboxd:memberRating'],
                 filmYear: item['letterboxd:filmYear'],
-                watchedDate: item['letterboxd:watchedDate']
+                watchedDate: item['letterboxd:watchedDate'],
+                tmdbMovieId: item['tmdb:movieId'],
             }));
 
             this.displayFilms(films);
         } catch (error) {
-            console.error('Erro ao acessar a RSS feed:', error.message);
+            console.error('Error accessing the RSS feed:', error.message);
         }
     }
 
-    private displayFilms(items: FilmData[]): void {
-        console.log(`Filmes assistidos por ${this.username}:`);
-        items.forEach(item => {
+    private async fetchFilmDetails(tmdbMovieId: string): Promise<number | undefined> {
+        const token = process.env.TMDB_API_TOKEN;
+
+        if (!token) {
+            console.error('TMDB API token is missing');
+            return;
+        }
+
+        const url = `https://api.themoviedb.org/3/movie/${tmdbMovieId}?language=en-US`;
+
+        try {
+            const response = await axios.get(url, {
+                headers: {
+                    accept: 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const movieDetails = response.data;
+            return movieDetails.runtime;
+        } catch (error) {
+            console.error('Error fetching film details:', error.message);
+        }
+    }
+
+    private async displayFilms(items: FilmData[]): Promise<void> {
+        console.log(`Films watched by ${this.username}:`);
+        items.forEach(async item => {
+            const movieId = item.tmdbMovieId[0];
             const title = item.filmTitle[0];
             const rating = item.memberRating[0];
             const year = item.filmYear[0];
             const date = item.watchedDate[0];
-            console.log(`Filme: ${title}, Ano de Lançamento: ${year}, Nota: ${rating}, Data: ${date}`);
+
+            const runtime = await this.fetchFilmDetails(movieId);
+
+            console.log(`Film: ${title}, Release Year: ${year}, Runtime: ${runtime} mins, Rating: ${rating}, Date: ${date}`);
         });
-        console.log('Até aqui tudo ok');
-        return
+        return;
     }
 }
 
-const user = new LetterboxdAPI('USERNAME');
+const username = process.env.LETTERBOXD_USER;
+
+if (!username) {
+    throw new Error('LETTERBOXD_USER environment variable is not defined');
+}
+
+const user = new LetterboxdAPI(username);
 user.fetchRecentFilms();
