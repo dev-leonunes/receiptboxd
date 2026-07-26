@@ -10,8 +10,8 @@
   "author": "Leonardo Nunes",
   "license": "ISC",
   "scripts": {
-    "start": "tsx --env-file .env ./app.ts",
-    "start:dev": "tsx watch --env-file .env ./app.ts"
+    "start": "tsx --env-file .env ./src/app.ts",
+    "start:dev": "tsx watch --env-file .env ./src/app.ts"
   },
   "keywords": [],
   "dependencies": {
