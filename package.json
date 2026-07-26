@@ -1,7 +1,12 @@
 {
   "name": "receiptboxd",
   "version": "1.0.0",
-  "main": "app.js",
+  "type": "module",
+  "packageManager": "pnpm@11.15.1",
+  "engines": {
+    "node": ">=24.12.0 <25.0.0",
+    "pnpm": ">=11.0.0 <12.0.0"
+  },
   "repository": {
     "type": "git",
     "url": ""
@@ -10,18 +15,19 @@
   "author": "Leonardo Nunes",
   "license": "ISC",
   "scripts": {
-    "start": "tsx --env-file .env ./src/app.ts",
-    "start:dev": "tsx watch --env-file .env ./src/app.ts"
+    "build": "pnpm exec tsc",
+    "typecheck": "pnpm exec tsc --noEmit --incremental false",
+    "start": "pnpm run build && node --env-file=.env dist/app.js",
+    "dev": "node --watch --env-file=.env src/app.ts"
   },
   "keywords": [],
   "dependencies": {
-    "axios": "^1.7.7",
+    "axios": "^1.18.1",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
-    "@types/node": "^22.5.5",
+    "@types/node": "^24.13.3",
     "@types/xml2js": "^0.4.14",
-    "tsx": "^4.19.1",
-    "typescript": "^5.6.2"
+    "typescript": "^7.0.2"
   }
 }
